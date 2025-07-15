@@ -6,6 +6,7 @@ const Expense = new Schema(
     name: {
       type: String,
       required: true,
+      default: 'Unnamed Expense'
     },
     amount: {
       type: Number,
