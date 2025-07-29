@@ -1,4 +1,4 @@
-Cash App API – A lightweight Node.js & Express backend for the Cash App. Handles user authentication (JWT), transaction CRUD operations, and real-time financial tracking. Uses MongoDB with Mongoose for data persistence. Designed for scalability and ease of integration with mobile or web clients.
+Cash App API – A lightweight Node.js & Express backend for the Cash App. Handles user authentication (JWT), and real-time financial tracking. Uses MongoDB with Mongoose for data persistence. Designed for scalability and ease of integration with mobile or web clients.
 
 ## 🧾 Auth Endpoints
 
