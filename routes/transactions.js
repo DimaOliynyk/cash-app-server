@@ -8,7 +8,7 @@ router.get("/", auth, async (req, res, next) => {
   try {
     const userId = req.user._id; // assuming auth middleware sets this
 
-    const expenses = await Expense.find({ author: userId })
+    const expenses = await Expense.find({ author: userId }).populate('category')
 
     return res.json(expenses);
   } catch (error) {
@@ -19,23 +19,105 @@ router.get("/", auth, async (req, res, next) => {
 
 
 
-// router.get("/:postId", async (req, res, next) => {
-//   const { postId } = req.params;
-//   try {
-//     const post = await Posts.findById(postId)
-//       .populate("tags")
-//       .populate("author")
-//       .populate({ path: "comments", populate: { path: "author" } });
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const transaction = await Expense.findById(id)
+      .populate("author")
+      .populate('category')
 
-//     return res.json(post);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json(error);
-//   }
-// });
+    return res.json(transaction);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
+router.get("/sum", auth, async (req, res, next) => {
+  const userId = req.user._id;
+
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const transactions = await Expense.find({ author: userId });
+
+    let totalIncome = 0;
+    let totalSpend = 0;
+    let incomeThisMonth = 0;
+    let spendThisMonth = 0;
+
+    transactions.forEach(tx => {
+      const isIncome = tx.sum >= 0;
+      const isThisMonth = new Date(tx.date) >= startOfMonth && new Date(tx.date) <= endOfMonth;
+
+      if (isIncome) {
+        totalIncome += tx.sum;
+        if (isThisMonth) incomeThisMonth += tx.sum;
+      } else {
+        totalSpend += Math.abs(tx.sum); // Make spend positive for reporting
+        if (isThisMonth) spendThisMonth += Math.abs(tx.sum);
+      }
+    });
+
+    const balance = totalIncome - totalSpend;
+
+    return res.json({
+      balance,
+      totalIncome,
+      totalSpend,
+      incomeThisMonth,
+      spendThisMonth,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+router.put("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  try {
+    const updatedTransaction = await Expense.findByIdAndUpdate(
+      id,
+      { amount },
+      { new: true }
+    ).populate("author");
+
+    if (!updatedTransaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    return res.json(updatedTransaction);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const deletedTransaction = await Expense.findByIdAndDelete(id);
+
+    if (!deletedTransaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    return res.json({ message: "Transaction deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 router.post(
-  "/",
+  "/expense",
   auth,
   async (req, res, next) => {
     try {
@@ -60,7 +142,7 @@ router.post(
 );
 
 router.post(
-  "/incomeAdd",
+  "/income",
   auth,
   async (req, res, next) => {
     try {

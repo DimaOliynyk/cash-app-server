@@ -20,6 +20,11 @@ const Expense = new Schema(
       type: String,
       required: true,
     },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category', // reference to your Category model
+      required: false,  // optional, but recommended to require in your app logic
+    },
   },
   
   {

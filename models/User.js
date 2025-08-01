@@ -63,6 +63,10 @@ const User = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Expense'
     }],
+    categories: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Category'
+    }],
     description: {
       type: String,
       required: false,
