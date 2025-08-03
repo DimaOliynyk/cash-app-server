@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { attachment } = require('express/lib/response');
 const bcrypt = require('bcryptjs');
 const Category = require('../models/CategorySchema'); // Adjust path accordingly
+const Expense = require('../models/Expense.js')
 
 async function createDefaultCategoriesForUser(userId) {
   const defaultCategories = [
@@ -58,7 +59,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.body.username }).populate('categories') ;
+    const user = await User.findOne({ username: req.body.username }).populate('categories').populate('expenses') ;
     if (!user || !(await user.validPassword(req.body.password))) {
       res.status(400).json({ message: 'invalid credentials' });
       return;

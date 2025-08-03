@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const { auth } = require('../middlewares');
-const { Expense, User } = require('../models')
+const Expense = require('../models/Expense.js');
+const { User } = require('../models')
 console.log("Expense model loaded:", Expense);
 router.get("/", auth, async (req, res, next) => {
   try {
@@ -99,17 +100,38 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
+
 router.delete("/:id", async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const deletedTransaction = await Expense.findByIdAndDelete(id);
-
-    if (!deletedTransaction) {
+    // 1. Find the transaction first
+    const transaction = await Expense.findById(id);
+    if (!transaction) {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    return res.json({ message: "Transaction deleted successfully" });
+    // 2. Find the author user
+    const user = await User.findById(transaction.author);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 3. Update the user's balance based on transaction type
+    if (transaction.type === "income" || transaction.type === "+") {
+      user.balance -= transaction.amount;  // removing income → subtract
+    } else {
+      user.balance += transaction.amount;  // removing expense → add back
+    }
+
+    // 4. Save the updated user balance
+    await user.save();
+
+    // 5. Delete the transaction
+    await Expense.findByIdAndDelete(id);
+
+    return res.json({ message: "Transaction deleted and balance updated successfully" });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });

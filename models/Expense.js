@@ -39,4 +39,4 @@ const Expense = new Schema(
 );
 
 
-module.exports = model("expense", Expense);
+module.exports = model("Expense", Expense);

@@ -4,7 +4,6 @@ const CategorySchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true, // optional but recommended
   },
   iconUrl: {
     type: String, // Optional: you can store an icon or color for UI
@@ -16,5 +15,7 @@ const CategorySchema = new Schema({
     required: true,
   },
 });
+
+CategorySchema.index({ name: 1, author: 1 }, { unique: true });
 
 module.exports = model("Category", CategorySchema);
