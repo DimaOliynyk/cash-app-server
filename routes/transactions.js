@@ -101,7 +101,7 @@ router.put("/:id", async (req, res, next) => {
 });
 
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", auth, async (req, res, next) => {
   const { id } = req.params;
 
   try {
@@ -119,8 +119,10 @@ router.delete("/:id", async (req, res, next) => {
 
     // 3. Update the user's balance based on transaction type
     if (transaction.type === "income" || transaction.type === "+") {
+      user.totalIncome = user.totalIncome - transaction.amount;
       user.balance -= transaction.amount;  // removing income → subtract
     } else {
+      user.totalSpend = user.totalSpend + transaction.amount;
       user.balance += transaction.amount;  // removing expense → add back
     }
 

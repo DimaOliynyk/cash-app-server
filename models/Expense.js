@@ -12,6 +12,10 @@ const Expense = new Schema(
       type: Number,
       required: true,
     },
+    description: {
+      type: String,
+      required: true,
+    },
     author: {
       type: Schema.Types.ObjectId,
       ref: 'user'
