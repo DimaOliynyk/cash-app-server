@@ -5,6 +5,16 @@ const { auth } = require('../middlewares');
 const Expense = require('../models/Expense.js');
 const { User } = require('../models')
 console.log("Expense model loaded:", Expense);
+
+router.get("/ping", async (req, res, next) => {
+  try {
+    return res.json('pong');
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
 router.get("/", auth, async (req, res, next) => {
   try {
     const userId = req.user._id; // assuming auth middleware sets this
