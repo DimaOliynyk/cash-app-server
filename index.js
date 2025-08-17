@@ -1,11 +1,13 @@
+require("dotenv").config();
+
 const express = require("express");
 const volleyball = require("volleyball");
 const helmet = require("helmet");
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config();
 const passport = require("passport");
 const { Strategy, ExtractJwt } = require("passport-jwt");
+
 const app = express();
 
 
@@ -43,6 +45,7 @@ passport.use(
     }
   )
 );
+
 
 app.listen(process.env.PORT, () => {
     console.log("Server Listening on PORT:", process.env.PORT);

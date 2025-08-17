@@ -14,6 +14,10 @@ const User = new Schema(
       minlength: 6,
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+    },
     firstName: {
       type: String,
       minlength: 2,
@@ -82,6 +86,13 @@ const User = new Schema(
     birthDate: {
       type: Date,
     },
+    isVerified: {
+      type: Boolean,
+      default: true
+    },
+    verificationToken: { 
+      type: String 
+    }
   },
   
   {

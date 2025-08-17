@@ -12,6 +12,9 @@ router.post('/login', schemaValidate(authValidator.authLogin), authControllers.l
 
 router.get('/me', auth, authControllers.me);
 
+router.get('/verify/:token', authControllers.verify);
+
+
 router.get("/info", (req, res) => {
     const status = {
       "Status": "Running"
