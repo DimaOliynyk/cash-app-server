@@ -14,6 +14,7 @@ router.get('/me', auth, authControllers.me);
 
 router.get('/verify/:token', authControllers.verify);
 
+router.patch("/:id", auth, authControllers.changeUserDate);
 
 router.get("/info", (req, res) => {
     const status = {

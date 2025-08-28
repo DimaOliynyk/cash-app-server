@@ -155,3 +155,29 @@ exports.me = async (req, res) => {
     res.status(500).send(error);
   }
 };
+
+exports.changeUserDate = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Only allow certain fields to be updated
+    const allowedUpdates = ["username", "firstName", "lastName", "email", "password"];
+    const updates = {};
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    const user = await User.findByIdAndUpdate(userId, req.body.updates, { new: true });
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

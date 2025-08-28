@@ -14,6 +14,10 @@ const CategorySchema = new Schema({
     ref: 'user',
     required: true,
   },
+  moneyFlow: {
+    type: Number,
+    default: 0
+  }
 });
 
 CategorySchema.index({ name: 1, author: 1 }, { unique: true });

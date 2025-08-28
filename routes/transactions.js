@@ -28,6 +28,56 @@ router.get("/", auth, async (req, res, next) => {
   }
 });
 
+router.get("/cashflow", auth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+
+    // если у тебя Expense имеет поля { amount, type, createdAt }
+    const expenses = await Expense.aggregate([
+      {
+        $match: {
+          author: userId,
+          createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+        }
+      },
+      {
+        $project: {
+          day: { $dayOfMonth: "$createdAt" },
+          amount: {
+            $cond: [
+              { $eq: ["$type", "+"] }, // если доход
+              "$amount",
+              { $multiply: ["$amount", -1] } // если расход
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$day",
+          total: { $sum: "$amount" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // cumulative balance (накопительный)
+    let runningBalance = 0;
+    const cashflowData = expenses.map(e => {
+      runningBalance += e.total;
+      return { day: e._id, balance: runningBalance };
+    });
+
+    res.json(cashflowData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
 
 
 router.get("/:id", async (req, res, next) => {
@@ -156,16 +206,22 @@ router.post(
   async (req, res, next) => {
     try {
       // console.log(req)
+      if(req.body.amount > 20000){
+        return res.status(500).json("Expense amoung is too high");
+      }
+
       const new_expense = await Expense.create({
         ...req.body,
         author: req.user.id,
         type: '-'
       });
 
-
       req.user.expenses.push(new_expense);
+
       req.user.totalSpend = req.user.totalSpend - req.body.amount;
       req.user.balance = req.user.balance - req.body.amount;
+      req.user.spendThisMonth = req.user.spendThisMonth - req.body.amount;
+
       await req.user.save();
       return (res.json(new_expense), res.status(200));
     } catch (error) {
@@ -181,15 +237,23 @@ router.post(
   async (req, res, next) => {
     try {
       // console.log(req)
+      if(req.body.amount > 20000){
+        return res.status(500).json("Income amoung is too high");
+      }
+
       const new_expense = await Expense.create({
         ...req.body,
         author: req.user.id,
         type: '+'
       });
 
+
       req.user.expenses.push(new_expense);
+
       req.user.totalIncome = req.user.totalIncome + +req.body.amount;
       req.user.balance = req.user.balance + +req.body.amount;
+      req.user.incomeThisMonth = req.user.incomeThisMonth + +req.body.amount;
+
       await req.user.save();
       return (res.json(new_expense), res.status(200));
     } catch (error) {
