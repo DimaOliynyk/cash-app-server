@@ -138,7 +138,7 @@ exports.login = async (req, res) => {
 
 exports.me = async (req, res) => {
   try {
-    const existingUser = await User.findById(req.user._id).populate('categories') ;
+    const existingUser = await User.findById(req.user._id).populate('categories').populate('expenses') ;
       // .populate('likedPosts')
       // .populate('likedComments')
       // .populate('readingList');
