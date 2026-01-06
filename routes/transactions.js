@@ -6,13 +6,8 @@ const Expense = require('../models/Expense.js');
 const { User } = require('../models')
 console.log("Expense model loaded:", Expense);
 
-router.get("/ping", async (req, res, next) => {
-  try {
-    return res.json('pong');
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
+router.get("/ping", (req, res) => {
+  res.status(200).send("pong");
 });
 
 router.get("/", auth, async (req, res, next) => {

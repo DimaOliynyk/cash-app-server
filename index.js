@@ -10,6 +10,8 @@ const { Strategy, ExtractJwt } = require("passport-jwt");
 
 const app = express();
 
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const { auth } = require("./routes/ìndex")
 const { transactions } = require("./routes/ìndex")
@@ -46,6 +48,32 @@ passport.use(
   )
 );
 
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Cash App API",
+      version: "1.0.0",
+      description: "API для управления транзакциями с JWT авторизацией"
+    },
+    servers: [
+      { url: "http://localhost:3000" }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT"
+        }
+      }
+    },
+    security: [{ bearerAuth: [] }]
+  },
+  apis: ["./routes/*.js"], // пути к твоим файлам с эндпоинтами
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 app.listen(process.env.PORT, () => {
     console.log("Server Listening on PORT:", process.env.PORT);
@@ -53,5 +81,6 @@ app.listen(process.env.PORT, () => {
 
 app.use("/api/auth", auth);
 app.use("/api/transactions", transactions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 module.exports = app;

@@ -76,7 +76,7 @@ exports.register = async (req, res) => {
 
 
 
-    res.json({
+    res.status(200).json({
       user: newUser,
       token: jwToken,
       message: "Registration successful! Check your email to verify your account."
